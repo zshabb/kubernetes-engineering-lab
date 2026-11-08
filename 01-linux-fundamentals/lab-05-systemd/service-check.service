@@ -1,0 +1,7 @@
+[Unit]
+Description=Kubernetes Engineering Lab - Service Check
+
+[Service]
+Type=oneshot
+User=pullz
+ExecStart=/home/pullz/kubernetes-engineering-lab/01-linux-fundamentals/lab-05-systemd/service-check.sh
