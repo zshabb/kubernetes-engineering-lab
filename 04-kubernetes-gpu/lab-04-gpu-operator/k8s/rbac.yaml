@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: gpuworkload-operator
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: gpuworkload-operator
+  namespace: default
+rules:
+  - apiGroups: ["training.example.com"]
+    resources: ["gpuworkloads"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gpuworkload-operator
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: gpuworkload-operator
+    namespace: default
+roleRef:
+  kind: Role
+  name: gpuworkload-operator
+  apiGroup: rbac.authorization.k8s.io
