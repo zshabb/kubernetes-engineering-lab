@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simulated-dcgm
+  namespace: gpu-observability
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: simulated-dcgm}
+  template:
+    metadata:
+      labels: {app: simulated-dcgm}
+    spec:
+      containers:
+        - name: exporter
+          image: gpu-metrics-simulator:lab05
+          imagePullPolicy: Never
+          ports: [{name: metrics, containerPort: 9400}]
+          readinessProbe: {httpGet: {path: /healthz, port: metrics}, initialDelaySeconds: 2}
+          livenessProbe: {httpGet: {path: /healthz, port: metrics}, initialDelaySeconds: 5}
+          resources:
+            requests: {cpu: 20m, memory: 32Mi}
+            limits: {cpu: 200m, memory: 128Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simulated-dcgm
+  namespace: gpu-observability
+spec:
+  selector: {app: simulated-dcgm}
+  ports: [{name: metrics, port: 9400, targetPort: metrics}]

@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: gpu-observability
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: grafana}
+  template:
+    metadata:
+      labels: {app: grafana}
+    spec:
+      securityContext: {fsGroup: 472}
+      containers:
+        - name: grafana
+          image: grafana/grafana:11.6.3
+          ports: [{name: http, containerPort: 3000}]
+          env:
+            - {name: GF_SECURITY_ADMIN_USER, value: admin}
+            - {name: GF_SECURITY_ADMIN_PASSWORD, value: lab-only-change-me}
+            - {name: GF_AUTH_ANONYMOUS_ENABLED, value: 'false'}
+          readinessProbe: {httpGet: {path: /api/health, port: http}, initialDelaySeconds: 10}
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {cpu: '1', memory: 512Mi}
+          volumeMounts:
+            - {name: datasources, mountPath: /etc/grafana/provisioning/datasources, readOnly: true}
+            - {name: providers, mountPath: /etc/grafana/provisioning/dashboards, readOnly: true}
+            - {name: dashboards, mountPath: /var/lib/grafana/dashboards, readOnly: true}
+      volumes:
+        - name: datasources
+          configMap: {name: grafana-provisioning, items: [{key: datasources.yaml, path: datasources.yaml}]}
+        - name: providers
+          configMap: {name: grafana-provisioning, items: [{key: dashboards.yaml, path: dashboards.yaml}]}
+        - name: dashboards
+          configMap: {name: grafana-dashboard}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: gpu-observability
+spec:
+  selector: {app: grafana}
+  ports: [{name: http, port: 3000, targetPort: http}]
