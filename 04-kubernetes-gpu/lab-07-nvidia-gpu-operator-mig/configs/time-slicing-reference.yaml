@@ -1,0 +1,20 @@
+# Reference only: device-plugin time-slicing is NOT MIG hardware isolation.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lab07-timeslicing-reference
+  namespace: gpu-operator
+  annotations:
+    training.example.com/reference-only: "true"
+data:
+  any: |
+    version: v1
+    flags:
+      migStrategy: none
+    sharing:
+      timeSlicing:
+        renameByDefault: true
+        failRequestsGreaterThanOne: true
+        resources:
+          - name: nvidia.com/gpu
+            replicas: 4

@@ -1,0 +1,20 @@
+# Reference configuration for NVIDIA GPU Operator MIG Manager on compatible hardware.
+# Do not apply to kind: these labels are not physical GPU partitions.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lab07-mig-reference
+  namespace: gpu-operator
+  annotations:
+    training.example.com/reference-only: "true"
+data:
+  config.yaml: |
+    version: v1
+    mig-configs:
+      all-disabled:
+        - devices: all
+          mig-enabled: false
+      all-enabled:
+        - devices: all
+          mig-enabled: true
+          mig-devices: {}
